@@ -1,0 +1,49 @@
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+
+import sys
+import subprocess
+import re
+import requests
+import datetime
+from requests.auth import HTTPBasicAuth
+
+# get the config from git
+bcTodo = subprocess.check_output("git config basecamp.todo-id", shell=True).strip()
+bcUser = subprocess.check_output("git config basecamp.user-id", shell=True).strip()
+bcKey = subprocess.check_output("git config basecamp.key", shell=True).strip()
+bcUrl = subprocess.check_output("git config basecamp.url", shell=True).strip()
+
+# get the last commit and parse the commit message and time
+# time should be wrapped in single square braces and in hours
+# ex: [.5] is 30 minutes
+commit = subprocess.check_output("git log -1 HEAD", shell=True)
+commit = commit.split('\n')
+message = commit[4]
+time = re.search(r'\[.*\]', message)
+
+if not time:
+  print "No time logged to basecamp"
+  exit(1)
+
+# parse the time 
+time = time.group()
+time = re.sub(r'[\[\]]','', time)
+# get the message text without time
+message = re.sub(r'\[.*\]|\s{2,}', '', message)
+
+# do the post to basecamp
+myAuth = HTTPBasicAuth(bcKey, '')
+
+data = "<time-entry>\n\
+  <person-id>" + bcUser + "</person-id>\n\
+  <date>" + str(datetime.datetime.now()) + "</date>\n\
+  <hours>" + time + "</hours>\n\
+  <description>" + message + "</description>\n\
+</time-entry>"
+
+headers = {'content-type': 'text/xml'}
+r = requests.post(bcUrl + '/todo_items/' + bcTodo + '/time_entries.xml', data=data, auth=myAuth, headers=headers)
+
+print "Basecamp timesheet updated with " + time + " hours"
+
