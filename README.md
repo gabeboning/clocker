@@ -16,12 +16,12 @@ You'll need your basecamp url, user id, and API key. For each project you intend
 Drop the post-commit into the git hooks directory for whatever project you intend to use it for. Then set up the git config:
 
     $ git config --global --add basecamp.url https://yours.basecamphq.com
-    $ git config --global --add basecamp.user-id youruserid(should be 7 base 10 digits)
+    $ git config --global --add basecamp.user-id youruserid
     $ git config --global --add basecamp.key yourlongauthenticationtoken
 
 Those are global config used across all repositories you'll be logging time for. In each repository, you'll need to set the todo ID:
 
-    $ git config --add basecamp.todo-id numberictodoid
+    $ git config --add basecamp.todo-id todoid
 
 Once that's all set up, billing time is as easy as putting it in your commit message
   
